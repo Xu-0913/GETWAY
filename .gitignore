@@ -1,0 +1,19 @@
+# 所有 build 目录
+**/build/
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# 编译产物
+*.o
+*.so
+*.a
+*.out
+
+# 可执行文件
+Buffer
+
+# 公共库
+Public/
