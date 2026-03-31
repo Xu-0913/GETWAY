@@ -13,13 +13,33 @@ add_executable(Buffer
     ../Public/_public.cpp
 )
 
+add_executable(MQTTClient
+    _MQTTClient.cpp
+    _MQTTCallback.cpp
+    ../Public/_public.cpp
+)
+
+
 target_link_libraries(Buffer PRIVATE  pthread ) #
+set(CMAKE_BUILD_TYPE Debug)  #生成调试信息
+
+target_link_libraries(MQTTClient PRIVATE
+    paho-mqttpp3
+    paho-mqtt3as
+    pthread
+)
 set(CMAKE_BUILD_TYPE Debug)  #生成调试信息
 
 add_custom_command(TARGET Buffer POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
     ${CMAKE_CURRENT_BINARY_DIR}/Buffer
-    /home/xu/GetWay/App/build
+    /home/xu/GetWay/bin
+)
+
+add_custom_command(TARGET MQTTClient POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_BINARY_DIR}/MQTTClient
+    /home/xu/GetWay/bin
 )
 
 
