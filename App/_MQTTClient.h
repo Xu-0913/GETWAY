@@ -34,17 +34,18 @@ private:
     std::mutex subMutex_;
 
 public:
-    explicit MQTTClient(const MQTTClientConfig& config);
+    MQTTClient(const MQTTClientConfig& config);
     ~MQTTClient();
 
     int start();
     int send(const char* data, int len);
-    int tryResubscribe();
+    bool tryResubscribe();
     void close();
-
+    
+    // 注册回调入口
     void registerRecvCallback(std::function<int(const char*, int)> callback);
 
-public:
+    // 回调函数实现
     void onConnected(const std::string& cause);
     void onConnectionLost(const std::string& cause);
     void onMessageArrived(mqtt::const_message_ptr msg);
