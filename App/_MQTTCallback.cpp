@@ -25,10 +25,8 @@ void MQTTCallback::delivery_complete(mqtt::delivery_token_ptr token)
     }
 }
 
-void MQTTCallback::connected(const std::string& cause)
+void MQTTCallback::MQTTCallback::connected(const std::string& cause)
 {
-    std::cout << "MQTT connected/reconnected: " << cause << std::endl;
-
     if (owner_ != nullptr)
     {
         owner_->onConnected(cause);
