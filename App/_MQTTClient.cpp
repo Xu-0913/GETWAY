@@ -1,19 +1,15 @@
 #include "_MQTTClient.h"
 #include "_MQTTCallback.h"
 
-MQTTClient::MQTTClient(const MQTTClientConfig& config)
-    : client_(config.server, config.clientId),
-      config_(config),
-      callback_(nullptr),
-      connected_(false),
-      needResubscribe_(false),
-      firstConnectDone_(false)
+MQTTClient::MQTTClient(const MQTTClientConfig& config) :client_(config.server, config.clientId),
+                                                        config_(config),callback_(nullptr),connected_(false),
+                                                        needResubscribe_(false),firstConnectDone_(false)
 {
     callback_ = std::make_unique<MQTTCallback>(this);
     client_.set_callback(*callback_);
 
     connOpts_.set_keep_alive_interval(config_.keepAliveInterval);
-    connOpts_.set_clean_session(config_.cleanSession);
+    connOpts_.set_clean_session(config_.cleanSession);  // false才会再次订阅
     connOpts_.set_automatic_reconnect(true);
 }
 
@@ -91,8 +87,8 @@ int MQTTClient::send(const char* data, int len)
 
         std::lock_guard<std::mutex> lock(pubMutex_);
 
-        auto tok = client_.publish(config_.pubTopic, data, len, config_.qos, false);
-        tok->wait();
+        auto token = client_.publish(config_.pubTopic, data, len, config_.qos, false);
+        token->wait();
 
         std::cout << "MQTT publish success. topic = " << config_.pubTopic
                   << ", payload = " << std::string(data, len) << std::endl;
@@ -118,42 +114,37 @@ int MQTTClient::send(const char* data, int len)
     }
 }
 
-int MQTTClient::tryResubscribe()
+bool MQTTClient::tryResubscribe()
 {
-    if (!needResubscribe_)
-    {
-        return 0;
-    }
+    if (!needResubscribe_) {return false;}
 
-    if (!connected_ || !client_.is_connected())
-    {
-        return -1;
-    }
+    if (!connected_ || !client_.is_connected()) {return false;}
 
     try
     {
         std::lock_guard<std::mutex> lock(subMutex_);
-
-        client_.subscribe(config_.subTopic, config_.qos)->wait();
+        client_.subscribe(config_.subTopic, config_.qos);
         needResubscribe_ = false;
-
         std::cout << "MQTT re-subscribe success. topic = " << config_.subTopic << std::endl;
-        return 0;
+        return true;
     }
+
     catch (const mqtt::exception& e)
     {
         std::cerr << "MQTT re-subscribe failed: " << e.what() << std::endl;
-        return -1;
+        return false;
     }
+
     catch (const std::exception& e)
     {
         std::cerr << "MQTT re-subscribe failed: " << e.what() << std::endl;
-        return -1;
+        return false;
     }
+
     catch (...)
     {
         std::cerr << "MQTT re-subscribe failed: unknown exception" << std::endl;
-        return -1;
+        return false;
     }
 }
 
@@ -163,23 +154,22 @@ void MQTTClient::close()
     {
         connected_ = false;
         needResubscribe_ = false;
-
-        if (!client_.is_connected())
-        {
-            return;
-        }
+    if (!client_.is_connected()){return;}
 
         client_.disconnect()->wait();
         std::cout << "MQTTClient disconnected." << std::endl;
     }
+
     catch (const mqtt::exception& e)
     {
         std::cerr << "MQTTClient close failed: " << e.what() << std::endl;
     }
+
     catch (const std::exception& e)
     {
         std::cerr << "MQTTClient close failed: " << e.what() << std::endl;
     }
+
     catch (...)
     {
         std::cerr << "MQTTClient close failed: unknown exception" << std::endl;
@@ -189,7 +179,6 @@ void MQTTClient::close()
 void MQTTClient::onConnected(const std::string& cause)
 {
     connected_ = true;
-
     std::cout << "MQTT connected";
     if (!cause.empty())
     {
@@ -209,10 +198,7 @@ void MQTTClient::onConnectionLost(const std::string& cause)
     needResubscribe_ = true;
 
     std::cerr << "MQTT connection lost";
-    if (!cause.empty())
-    {
-        std::cerr << ": " << cause;
-    }
+    if (!cause.empty()){std::cerr << ": " << cause;}
     std::cerr << std::endl;
 }
 
@@ -264,7 +250,7 @@ void MQTTClient::onDeliveryComplete(mqtt::delivery_token_ptr token)
 int main()
 {
     MQTTClient::MQTTClientConfig config;
-    config.server = "tcp://172.21.8.0:1883";   // 先本机跑通，再换成真实服务器IP
+    config.server = "tcp://172.21.8.0:1883";   
     config.clientId = "test_client_1";
     config.subTopic = "test/topic";
     config.pubTopic = "test/topic";
