@@ -23,6 +23,7 @@ class Buffer
     public:
         std::size_t read(char* dst, std::size_t len);
         bool write(const char* src, std::size_t len);
+        bool peek(char* dst, std::size_t len) const;
         void clear();
         std::size_t readableSize() const;
         std::size_t writableSize() const;

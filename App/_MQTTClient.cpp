@@ -245,8 +245,6 @@ void MQTTClient::onDeliveryComplete(mqtt::delivery_token_ptr token)
 }
 
 
-
-
 int main()
 {
     MQTTClient::MQTTClientConfig config;

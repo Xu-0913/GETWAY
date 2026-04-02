@@ -96,6 +96,16 @@ bool Buffer::full() const
     return len_ == size_;
 }
 
+bool Buffer::peek(char* dst, std::size_t len) const
+{
+    if (len_ < len) return false;
+    size_t firstPart = std::min(len, buffer_.size() - start_);
+    std::memcpy(dst, &buffer_[start_], firstPart);
+    if (len > firstPart) std::memcpy(dst + firstPart, &buffer_[0], len - firstPart);
+    return true;
+}
+
+
 int main()
 {
     Buffer buf(1024);
@@ -111,3 +121,6 @@ int main()
 
     return 0;
 }
+
+
+
