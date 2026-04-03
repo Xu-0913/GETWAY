@@ -28,16 +28,13 @@ ThreadPool::ThreadPool(size_t threadnum,const std::string& type):stop_(false), t
 
 void ThreadPool::addtask(std::function<void()> task)
 {
-    stop_ = true;
-    condition_.notify_all();
-
-    for (auto& x : threads_)
+    if (!task) return;
     {
-        if (x.joinable())
-        {
-            x.join();
-        }
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (stop_) return;
+        taskqueue_.push(std::move(task));
     }
+    condition_.notify_one();
 }
 
 void ThreadPool::stopthread()
