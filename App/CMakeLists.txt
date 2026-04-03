@@ -12,6 +12,7 @@ add_compile_options(-w)
 find_package(nlohmann_json REQUIRED)
 
 add_executable(GETWAY
+    Getway.cpp
     Buffer.cpp
     Device.cpp
     Message.cpp
@@ -22,7 +23,6 @@ add_executable(GETWAY
     _MQTTCallback.cpp
     bluetooth.cpp
     run.cpp
-    test.cpp
     ../Public/_public.cpp
 )
 
@@ -35,10 +35,11 @@ target_link_libraries(GETWAY PRIVATE
     pthread
     paho-mqttpp3
     paho-mqtt3as
+    nlohmann_json::nlohmann_json
 )
 
 add_custom_command(TARGET GETWAY POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
-    ${CMAKE_CURRENT_BINARY_DIR}/GETWAY
-    /home/xu/GetWay/bin
+            ${CMAKE_CURRENT_BINARY_DIR}/GETWAY
+            /home/xu/GetWay/bin/GETWAY
 )
