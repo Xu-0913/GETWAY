@@ -140,11 +140,17 @@ make -j
 ```bash
 # 启动网关
 ./GETWAY
+```
 
+```bash
 # 启动 OTA
 ./ota
-
-# 启动守护进程(推荐)
+```
+```text
+直接采用守护进程启动时，不需要单独启动OTA和GETWAY
+```
+```bash
+# 启动守护进程
 ./daemon
 ```
 
