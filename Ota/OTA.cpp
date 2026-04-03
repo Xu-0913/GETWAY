@@ -1,26 +1,4 @@
 #include "OTA.h"
-
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <iomanip>
-#include <thread>
-#include <chrono>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cerrno>
-#include <algorithm>
-#include <cctype>
-
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-
-
-#include <nlohmann/json.hpp>
-
 using json = nlohmann::json;
 
 namespace
@@ -77,7 +55,7 @@ namespace
     }
 }
 
-// ========================= ctor / dtor =========================
+// ctor / dtor 
 
 OTA::OTA(const Config& config)
     : config_(config)
@@ -95,7 +73,7 @@ OTA::~OTA()
     }
 }
 
-// ========================= lifecycle =========================
+//  lifecycle 
 
 int OTA::init()
 {
@@ -248,7 +226,7 @@ void OTA::stop() noexcept
     running_ = false;
 }
 
-// ========================= boot pending / commit / rollback =========================
+//  boot pending / commit / rollback
 
 int OTA::handlePendingBoot()
 {
@@ -292,7 +270,7 @@ int OTA::rollback()
     return stepRollback();
 }
 
-// ========================= getters =========================
+//  getters 
 
 OTA::State OTA::getState() const noexcept
 {
@@ -324,7 +302,7 @@ bool OTA::isUpgradePending() const noexcept
     return bootMeta_.upgradePending;
 }
 
-// ========================= callback register =========================
+//  callback register 
 
 void OTA::registerHealthCheckCallback(std::function<int()> cb)
 {
@@ -350,7 +328,7 @@ void OTA::registerPersistVersionCallback(std::function<int(const Version&)> cb)
     persistVersionCallback_ = std::move(cb);
 }
 
-// ========================= steps =========================
+//  steps 
 
 int OTA::stepCheckVersion()
 {
@@ -606,7 +584,7 @@ int OTA::stepRollback()
     return 0;
 }
 
-// ========================= utility =========================
+//  utility 
 
 bool OTA::isNewerVersion(const Version& remote, const Version& local) const
 {
@@ -674,7 +652,7 @@ std::string OTA::versionToString(const Version& version) const
            std::to_string(version.patch);
 }
 
-// ========================= HTTP / manifest =========================
+//  HTTP / manifest 
 
 int OTA::httpGetString(const std::string& url, std::string& response)
 {
@@ -799,7 +777,7 @@ int OTA::validateManifest(const Manifest& manifest) const
     return 0;
 }
 
-// ========================= verify / file utils =========================
+//  verify / file utils
 
 int OTA::calcFileSha256(const std::string& filePath, std::string& sha256)
 {
@@ -958,7 +936,7 @@ int OTA::saveCurrentVersion(const Version& version)
     return atomicReplaceFile(tmpPath, config_.versionFilePath);
 }
 
-// ========================= boot meta =========================
+//  boot meta 
 
 int OTA::loadBootMeta()
 {
@@ -1070,7 +1048,7 @@ int OTA::resetBootMetaToDefault()
     return saveBootMeta();
 }
 
-// ========================= slot / boot target =========================
+//  slot / boot target 
 
 int OTA::writeToStandbySlot(const std::string& srcFile, const std::string& dstFile)
 {
@@ -1127,7 +1105,7 @@ int OTA::setBootTarget(Slot slot)
     return 0;
 }
 
-// ========================= health / reboot =========================
+//  health / reboot 
 
 int OTA::healthCheck()
 {
@@ -1166,7 +1144,7 @@ int OTA::rebootSystem()
     return (ret == 0) ? 0 : -1;
 }
 
-// ========================= curl callback =========================
+// curl callback
 
 std::size_t OTA::writeToString(void* contents, std::size_t size, std::size_t nmemb, void* userp)
 {
