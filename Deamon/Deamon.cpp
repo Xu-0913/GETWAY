@@ -1,11 +1,6 @@
 #include "/home/xu/GetWay/Deamon/Deamon.h"
-
-
-
 DaemonManager* DaemonManager::instance_ = nullptr;
 volatile std::sig_atomic_t DaemonManager::signalStopFlag_ = 0;
-
-// ==================== 生命周期 ====================
 
 DaemonManager::~DaemonManager()
 {
@@ -29,7 +24,7 @@ DaemonManager::~DaemonManager()
     instance_ = nullptr;
 }
 
-// ==================== 配置接口 ====================
+// 配置接口 
 
 void DaemonManager::setDaemonMode(bool enable) noexcept
 {
@@ -71,13 +66,8 @@ void DaemonManager::setStderrFile(const std::string& file)
     stderrFile_ = file;
 }
 
-// ==================== 进程管理 ====================
-
-int DaemonManager::addProcess(const std::string& name,
-                              const std::string& program,
-                              const std::vector<std::string>& args,
-                              bool autoRestart,
-                              int maxRestartCount)
+/* 添加进程 */
+int DaemonManager::addProcess(const std::string& name,const std::string& program,const std::vector<std::string>& args,bool autoRestart,int maxRestartCount)
 {
     if (runCalled_)
     {
@@ -122,9 +112,7 @@ bool DaemonManager::isStopping() const noexcept
     return stopping_;
 }
 
-// ==================== 主流程 ====================
-
-int DaemonManager::run()
+int DaemonManager::run()  //  核心
 {
     if (runCalled_)
     {
@@ -344,9 +332,7 @@ int DaemonManager::stopAll()
     return -1;
 }
 
-// ==================== 单个子进程操作 ====================
-
-int DaemonManager::startProcess(Process& proc)
+int DaemonManager::startProcess(Process& proc)  // 单个子进程操作
 {
     if (stopping_)
     {
@@ -477,9 +463,7 @@ int DaemonManager::restartProcess(Process& proc)
     return startProcess(proc);
 }
 
-// ==================== 守护进程内部逻辑 ====================
-
-int DaemonManager::daemonize()
+int DaemonManager::daemonize()  // 守护进程内部逻辑 
 {
     pid_t pid = ::fork();
     if (pid < 0)
@@ -717,9 +701,7 @@ void DaemonManager::handleStopSignalIfNeeded() noexcept
     }
 }
 
-// ==================== 查找/工具 ====================
-
-DaemonManager::Process* DaemonManager::findProcessByPid(pid_t pid) noexcept
+DaemonManager::Process* DaemonManager::findProcessByPid(pid_t pid) noexcept //  查找/工具 
 {
     for (auto& proc : processes_)
     {
@@ -855,7 +837,7 @@ void DaemonManager::markProcessStopped(Process& proc) noexcept
     proc.pid = -1;
 }
 
-// ==================== 信号处理 ====================
+// 信号处理 
 
 void DaemonManager::signalHandler(int sig)
 {

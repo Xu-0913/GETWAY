@@ -5,11 +5,11 @@ int main()
 {
     DaemonManager manager;
 
-    // 调试阶段：先前台运行，日志直接打终端
-    manager.setDaemonMode(false);
+    
+    manager.setDaemonMode(false);// 调试阶段使用的 前台运行，终端cout
     manager.setRedirectStdIO(false);
 
-    // 部署阶段可改成：
+    // 部署阶段示例：
     // manager.setDaemonMode(true);
     // manager.setRedirectStdIO(true);
     // manager.setStdoutFile("/tmp/getway_daemon.out");
@@ -27,7 +27,7 @@ int main()
         return -1;
     }
 
-    // OTA 先不纳入守护，后面你更新好了再打开
+    // 暂时还没有写好第二版
     /*
     if (manager.addProcess("ota", "/home/xu/GetWay/bin/ota", {}, true, 10) != 0)
     {
