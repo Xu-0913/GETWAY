@@ -33,13 +33,14 @@ class Device
         bool isRunning() const;                // 获取设备运行状态
         Message::ConnectionType connectionType() const; // 获取连接类型
         
+        
         // 虚函数
     protected:    
         virtual void backgroundTask();                // 后台线程核心函数
         virtual void recvTask();                       // 接收任务处理函数   
         virtual void sendTask();                      // 发送任务处理函数
         virtual int postRead(void* ptr, int& len);  // 读数据后处理函数
-        virtual int preWrite(void* ptr, int& len);  // 对应 vptr->pre_write 写数据前处理函数
+        virtual std::vector<uint8_t> preWrite(const uint8_t* data, size_t len);  // 对应 vptr->pre_write 写数据前处理函数
         
     public:
         //注册回调函数入口

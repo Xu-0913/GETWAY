@@ -41,7 +41,7 @@ bool Device::start()
     }
 
     std::cout << "Device started: " << filename_ << std::endl;
-    return 0;
+    return true;
 }
 
 bool Device::write(const void* ptr, int len)
@@ -178,19 +178,25 @@ void Device::sendTask()
 {
     while (true)
     {
-        if (sendBuffer_.readableSize() < 3) {return;}
+        if (sendBuffer_.readableSize() < 3)
+        {
+            return;
+        }
 
         unsigned char header[3] = {0};
-        if (!sendBuffer_.peek(reinterpret_cast<char*>(header), 3)){return;}
+        if (!sendBuffer_.peek(reinterpret_cast<char*>(header), 3))
+        {
+            return;
+        }
 
-        // 计算整包长度
         int bodyLen = static_cast<int>(header[1]) + static_cast<int>(header[2]);
         std::size_t totalLen = 3 + static_cast<std::size_t>(bodyLen);
 
-        // 半包
-        if (sendBuffer_.readableSize() < totalLen){return;}
+        if (sendBuffer_.readableSize() < totalLen)
+        {
+            return;
+        }
 
-        // 整包
         std::vector<unsigned char> packet(totalLen, 0);
         std::size_t n = sendBuffer_.read(reinterpret_cast<char*>(packet.data()), totalLen);
         if (n != totalLen)
@@ -199,16 +205,25 @@ void Device::sendTask()
             return;
         }
 
-        // 6. 写前处理，允许修改长度
-        int writeLen = static_cast<int>(packet.size());
-        if (preWrite(packet.data(), writeLen) < 0) {std::cerr << "preWrite failed, packet discarded." << std::endl;continue;}
+        std::vector<uint8_t> out = preWrite(packet.data(), packet.size());
+        if (out.empty())
+        {
+            std::cerr << "preWrite failed, packet discarded." << std::endl;
+            continue;
+        }
 
-        // 7. fd 无效，当前包丢弃
-        if (fd_ < 0){std::cerr << "Send failed: invalid fd." << std::endl;return;}
+        if (fd_ < 0)
+        {
+            std::cerr << "Send failed: invalid fd." << std::endl;
+            return;
+        }
 
-        // 写设备
-        ssize_t ret = ::write(fd_, packet.data(), static_cast<std::size_t>(writeLen));
-        if (ret < 0) {std::cerr << "Write device data error." << std::endl;return;}
+        ssize_t ret = ::write(fd_, out.data(), out.size());
+        if (ret < 0)
+        {
+            std::cerr << "Write device data error: " << std::strerror(errno) << std::endl;
+            return;
+        }
     }
 }
 
@@ -219,9 +234,13 @@ int Device::postRead(void* ptr, int& len)
     return 0;
 }
 
-int Device::preWrite(void* ptr, int& len)
+std::vector<uint8_t> Device::preWrite(const uint8_t* data, size_t len)
 {
-    (void)ptr;
-    (void)len;
-    return 0;
+    // 默认：不做任何协议转换，原样返回
+    if (data == nullptr || len == 0)
+    {
+        return {};
+    }
+
+    return std::vector<uint8_t>(data, data + len);
 }

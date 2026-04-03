@@ -25,7 +25,7 @@ void MQTTCallback::delivery_complete(mqtt::delivery_token_ptr token)
     }
 }
 
-void MQTTCallback::MQTTCallback::connected(const std::string& cause)
+void MQTTCallback::connected(const std::string& cause)
 {
     if (owner_ != nullptr)
     {

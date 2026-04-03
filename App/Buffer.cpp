@@ -73,54 +73,74 @@ void Buffer::clear()
 
 std::size_t Buffer::readableSize() const
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     return len_;
 }
 
 std::size_t Buffer::writableSize() const
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     return size_ - len_;
 }
 
 std::size_t Buffer::capacity() const
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     return size_;
 }
 
 bool Buffer::empty() const
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     return len_ == 0;
 }
 
 bool Buffer::full() const
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     return len_ == size_;
 }
 
 bool Buffer::peek(char* dst, std::size_t len) const
 {
-    if (len_ < len) return false;
-    size_t firstPart = std::min(len, buffer_.size() - start_);
-    std::memcpy(dst, &buffer_[start_], firstPart);
-    if (len > firstPart) std::memcpy(dst + firstPart, &buffer_[0], len - firstPart);
+    if (dst == nullptr || len == 0)
+    {
+        return false;
+    }
+
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    if (len_ < len)
+    {
+        return false;
+    }
+
+    std::size_t firstPart = std::min(len, size_ - start_);
+    std::memcpy(dst, buffer_.data() + start_, firstPart);
+
+    if (len > firstPart)
+    {
+        std::memcpy(dst + firstPart, buffer_.data(), len - firstPart);
+    }
+
     return true;
 }
 
+// int main()
+// {
+//     Buffer buf(1024);
 
-int main()
-{
-    Buffer buf(1024);
+//     const char* msg = "hello";
+//     buf.write(msg, 5);
 
-    const char* msg = "hello";
-    buf.write(msg, 5);
+//     char tmp[16] = {0};
+//     std::size_t n = buf.read(tmp, 5);
 
-    char tmp[16] = {0};
-    std::size_t n = buf.read(tmp, 5);
+//     std::cout << "read bytes: " << n << std::endl;
+//     std::cout << "data: " << tmp << std::endl;
 
-    std::cout << "read bytes: " << n << std::endl;
-    std::cout << "data: " << tmp << std::endl;
-
-    return 0;
-}
+//     return 0;
+// }
 
 
 

@@ -28,12 +28,16 @@ ThreadPool::ThreadPool(size_t threadnum,const std::string& type):stop_(false), t
 
 void ThreadPool::addtask(std::function<void()> task)
 {
-    {   
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (stop_) return; 
-		taskqueue_.push(task);
-    }   
-    condition_.notify_one();   // 唤醒一个线程。
+    stop_ = true;
+    condition_.notify_all();
+
+    for (auto& x : threads_)
+    {
+        if (x.joinable())
+        {
+            x.join();
+        }
+    }
 }
 
 void ThreadPool::stopthread()
@@ -54,28 +58,28 @@ size_t ThreadPool::size()
 	return threads_.size();
 }
 
-int main()
-{
-    const size_t thread_num = 5;
-    const size_t task_num   = 20000;
+// int main()
+// {
+//     const size_t thread_num = 5;
+//     const size_t task_num   = 20000;
 
-    std::atomic<size_t> counter = 0;
+//     std::atomic<size_t> counter = 0;
 
-    auto start = std::chrono::steady_clock::now();
+//     auto start = std::chrono::steady_clock::now();
 
-    {
-        ThreadPool pool(thread_num, "gateway");
+//     {
+//         ThreadPool pool(thread_num, "gateway");
 
-        for (size_t i = 0; i < task_num; ++i)
-        {
-            pool.addtask([&counter, i]{
-                // 模拟轻量业务处理
-                volatile int x = 0;
-                for (int k = 0; k < 100; ++k) x += k;
+//         for (size_t i = 0; i < task_num; ++i)
+//         {
+//             pool.addtask([&counter, i]{
+//                 // 模拟轻量业务处理
+//                 volatile int x = 0;
+//                 for (int k = 0; k < 100; ++k) x += k;
 
-                counter.fetch_add(1, std::memory_order_relaxed);
-            });
-        }
-    }
+//                 counter.fetch_add(1, std::memory_order_relaxed);
+//             });
+//         }
+//     }
 
-}
+// }
