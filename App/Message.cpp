@@ -155,13 +155,13 @@ std::vector<uint8_t> Message::hexToBytes(const std::string& hexStr)
     return bytes;
 }
 
-int main()
-{
-        std::vector<uint8_t> id   = {0x01, 0x02, 0xAB, 0xCD};
-        std::vector<uint8_t> data = {0x11, 0x22, 0x33, 0x44, 0x55};
-        Message msg(Message::ConnectionType::LORA, id, data);
-    return 0;
-}
+// int main()
+// {
+//         std::vector<uint8_t> id   = {0x01, 0x02, 0xAB, 0xCD};
+//         std::vector<uint8_t> data = {0x11, 0x22, 0x33, 0x44, 0x55};
+//         Message msg(Message::ConnectionType::LORA, id, data);
+//     return 0;
+// }
 
 
 

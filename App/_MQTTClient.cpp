@@ -245,42 +245,42 @@ void MQTTClient::onDeliveryComplete(mqtt::delivery_token_ptr token)
 }
 
 
-int main()
-{
-    MQTTClient::MQTTClientConfig config;
-    config.server = "tcp://172.21.8.0:1883";   
-    config.clientId = "test_client_1";
-    config.subTopic = "test/topic";
-    config.pubTopic = "test/topic";
-    config.qos = 1;
-    config.keepAliveInterval = 20;
-    config.cleanSession = false;
+// int main()
+// {
+//     MQTTClient::MQTTClientConfig config;
+//     config.server = "tcp://172.21.8.0:1883";   
+//     config.clientId = "test_client_1";
+//     config.subTopic = "test/topic";
+//     config.pubTopic = "test/topic";
+//     config.qos = 1;
+//     config.keepAliveInterval = 20;
+//     config.cleanSession = false;
 
-    MQTTClient client(config);
+//     MQTTClient client(config);
 
-    client.registerRecvCallback([](const char* data, int len) -> int {
-        std::cout << "[USER CALLBACK] recv: "
-                  << std::string(data, len) << std::endl;
-        return 0;
-    });
+//     client.registerRecvCallback([](const char* data, int len) -> int {
+//         std::cout << "[USER CALLBACK] recv: "
+//                   << std::string(data, len) << std::endl;
+//         return 0;
+//     });
 
-    if (client.start() != 0)
-    {
-        std::cerr << "MQTT start failed." << std::endl;
-        return -1;
-    }
+//     if (client.start() != 0)
+//     {
+//         std::cerr << "MQTT start failed." << std::endl;
+//         return -1;
+//     }
 
-    client.send("hello mqtt", 10);
+//     client.send("hello mqtt", 10);
 
-    std::cout << "Press Ctrl+C to exit..." << std::endl;
+//     std::cout << "Press Ctrl+C to exit..." << std::endl;
 
-    while (true)
-    {
-        client.tryResubscribe();
+//     while (true)
+//     {
+//         client.tryResubscribe();
 
-        std::this_thread::sleep_for(std::chrono::seconds(5));
-        client.send("ping", 4);
-    }
+//         std::this_thread::sleep_for(std::chrono::seconds(5));
+//         client.send("ping", 4);
+//     }
 
-    return 0;
-}
+//     return 0;
+// }

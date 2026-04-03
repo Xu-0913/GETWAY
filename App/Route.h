@@ -14,7 +14,7 @@ class Route
 
     public:
         Route(MQTTClient& mqttClient);
-        ~Route() = default;
+        ~Route();
 
         int init();
         int registerDevice(Device& device);
